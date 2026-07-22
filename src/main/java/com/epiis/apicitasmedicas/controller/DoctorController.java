@@ -36,4 +36,31 @@ public class DoctorController {
             return null;
         }
     }
+
+    @org.springframework.web.bind.annotation.PostMapping(path = "insert")
+    public ResponseEntity<com.epiis.apicitasmedicas.dto.response.ResponseDoctorInsert> actionInsert(@jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody com.epiis.apicitasmedicas.dto.request.RequestDoctorInsert request) {
+        try {
+            return ResponseEntity.ok(businessDoctor.insert(request));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @org.springframework.web.bind.annotation.PutMapping(path = "update")
+    public ResponseEntity<com.epiis.apicitasmedicas.dto.response.ResponseDoctorUpdate> actionUpdate(@jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody com.epiis.apicitasmedicas.dto.request.RequestDoctorUpdate request) {
+        try {
+            return ResponseEntity.ok(businessDoctor.update(request));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @org.springframework.web.bind.annotation.DeleteMapping(path = "delete/{idDoctor}")
+    public ResponseEntity<com.epiis.apicitasmedicas.dto.response.ResponseDoctorDelete> actionDelete(@org.springframework.web.bind.annotation.PathVariable String idDoctor) {
+        try {
+            return ResponseEntity.ok(businessDoctor.delete(idDoctor));
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }

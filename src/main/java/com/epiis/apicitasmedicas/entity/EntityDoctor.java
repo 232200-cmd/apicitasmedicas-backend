@@ -30,6 +30,9 @@ public class EntityDoctor {
     @Column(name = "email")
     private String email;
 
+    @Column(name = "phoneNumber")
+    private String phoneNumber;
+
     @Column(name = "createdAt")
     private Date createdAt;
 

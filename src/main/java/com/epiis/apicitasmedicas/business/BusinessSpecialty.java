@@ -30,4 +30,59 @@ public class BusinessSpecialty {
         response.success();
         return response;
     }
+
+    public com.epiis.apicitasmedicas.dto.response.ResponseSpecialtyInsert insert(com.epiis.apicitasmedicas.dto.request.RequestSpecialtyInsert request) {
+        com.epiis.apicitasmedicas.dto.response.ResponseSpecialtyInsert response = new com.epiis.apicitasmedicas.dto.response.ResponseSpecialtyInsert();
+        
+        EntitySpecialty specialty = new EntitySpecialty();
+        specialty.setIdSpecialty(java.util.UUID.randomUUID().toString());
+        specialty.setName(request.getName());
+        specialty.setCreatedAt(new java.util.Date());
+        specialty.setUpdatedAt(new java.util.Date());
+        
+        repositorySpecialty.save(specialty);
+        
+        response.listMessage.add("Especialidad insertada correctamente.");
+        response.success();
+        return response;
+    }
+
+    public com.epiis.apicitasmedicas.dto.response.ResponseSpecialtyUpdate update(com.epiis.apicitasmedicas.dto.request.RequestSpecialtyUpdate request) {
+        com.epiis.apicitasmedicas.dto.response.ResponseSpecialtyUpdate response = new com.epiis.apicitasmedicas.dto.response.ResponseSpecialtyUpdate();
+        
+        java.util.Optional<EntitySpecialty> optional = repositorySpecialty.findById(request.getIdSpecialty());
+        if (optional.isEmpty()) {
+            response.listMessage.add("La especialidad no existe.");
+            return response;
+        }
+
+        EntitySpecialty specialty = optional.get();
+        specialty.setName(request.getName());
+        specialty.setUpdatedAt(new java.util.Date());
+        
+        repositorySpecialty.save(specialty);
+        
+        response.listMessage.add("Especialidad actualizada correctamente.");
+        response.success();
+        return response;
+    }
+
+    public com.epiis.apicitasmedicas.dto.response.ResponseSpecialtyDelete delete(String idSpecialty) {
+        com.epiis.apicitasmedicas.dto.response.ResponseSpecialtyDelete response = new com.epiis.apicitasmedicas.dto.response.ResponseSpecialtyDelete();
+        
+        if (!repositorySpecialty.existsById(idSpecialty)) {
+            response.listMessage.add("La especialidad no existe.");
+            return response;
+        }
+
+        try {
+            repositorySpecialty.deleteById(idSpecialty);
+            response.listMessage.add("Especialidad eliminada correctamente.");
+            response.success();
+        } catch (Exception e) {
+            response.listMessage.add("No se puede eliminar la especialidad porque está siendo utilizada.");
+        }
+        
+        return response;
+    }
 }
