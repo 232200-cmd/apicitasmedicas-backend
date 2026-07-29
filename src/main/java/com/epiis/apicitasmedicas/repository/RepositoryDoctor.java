@@ -8,4 +8,6 @@ import com.epiis.apicitasmedicas.entity.EntityDoctor;
 public interface RepositoryDoctor extends JpaRepository<EntityDoctor, String> {
     boolean existsByEmail(String email);
     boolean existsByEmailAndIdDoctorNot(String email, String idDoctor);
+    boolean existsByPhoneNumber(String phoneNumber);
+    boolean existsByPhoneNumberAndIdDoctorNot(String phoneNumber, String idDoctor);
 }

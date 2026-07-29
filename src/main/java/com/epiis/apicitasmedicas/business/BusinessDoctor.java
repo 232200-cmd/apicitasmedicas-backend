@@ -80,6 +80,11 @@ public class BusinessDoctor {
             return response;
         }
 
+        if (repositoryDoctor.existsByPhoneNumber(request.getPhoneNumber().trim())) {
+            response.listMessage.add("El teléfono ya está registrado por otro doctor.");
+            return response;
+        }
+
         EntityDoctor doctor = new EntityDoctor();
         doctor.setIdDoctor(java.util.UUID.randomUUID().toString());
         doctor.setFirstName(request.getFirstName());
@@ -116,6 +121,11 @@ public class BusinessDoctor {
 
         if (repositoryDoctor.existsByEmailAndIdDoctorNot(request.getEmail().trim(), request.getIdDoctor())) {
             response.listMessage.add("El email ya está registrado por otro doctor.");
+            return response;
+        }
+
+        if (repositoryDoctor.existsByPhoneNumberAndIdDoctorNot(request.getPhoneNumber().trim(), request.getIdDoctor())) {
+            response.listMessage.add("El teléfono ya está registrado por otro doctor.");
             return response;
         }
 
