@@ -51,6 +51,31 @@ public class BusinessAppointment {
     public ResponseAppointmentInsert insert(RequestAppointmentInsert request) throws IOException {
         ResponseAppointmentInsert response = new ResponseAppointmentInsert();
 
+        // Validación de fecha pasada
+        if (request.getPreferredDate().before(new Date())) {
+            response.error();
+            response.listMessage.add("No puede solicitar una cita en una fecha u hora pasada.");
+            return response;
+        }
+
+        // Validación de choque de horarios (Margen de 30 minutos)
+        long thirtyMinutesMillis = 30 * 60 * 1000;
+        Date startTime = new Date(request.getPreferredDate().getTime() - thirtyMinutesMillis);
+        Date endTime = new Date(request.getPreferredDate().getTime() + thirtyMinutesMillis);
+        
+        int conflicts = repositoryAppointment.countConflictingAppointments(
+            request.getIdDoctor(), 
+            startTime, 
+            endTime, 
+            EnumProcess.REFUSED.toString(), 
+            EnumProcess.CLOSE.toString()
+        );
+        if (conflicts > 0) {
+            response.error();
+            response.listMessage.add("El doctor ya tiene una cita programada en ese horario. Por favor elija otra hora (margen de 30 min).");
+            return response;
+        }
+
         EntityAppointment entity = new EntityAppointment();
         entity.setIdAppointment(UUID.randomUUID().toString());
         entity.setIdSpecialty(request.getIdSpecialty());
