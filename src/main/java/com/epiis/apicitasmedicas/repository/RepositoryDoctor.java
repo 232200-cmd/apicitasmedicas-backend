@@ -5,4 +5,7 @@ import org.springframework.stereotype.Repository;
 import com.epiis.apicitasmedicas.entity.EntityDoctor;
 
 @Repository
-public interface RepositoryDoctor extends JpaRepository<EntityDoctor, String> {}
+public interface RepositoryDoctor extends JpaRepository<EntityDoctor, String> {
+    boolean existsByEmail(String email);
+    boolean existsByEmailAndIdDoctorNot(String email, String idDoctor);
+}

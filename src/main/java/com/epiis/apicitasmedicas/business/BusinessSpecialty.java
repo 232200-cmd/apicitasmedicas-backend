@@ -34,6 +34,11 @@ public class BusinessSpecialty {
     public com.epiis.apicitasmedicas.dto.response.ResponseSpecialtyInsert insert(com.epiis.apicitasmedicas.dto.request.RequestSpecialtyInsert request) {
         com.epiis.apicitasmedicas.dto.response.ResponseSpecialtyInsert response = new com.epiis.apicitasmedicas.dto.response.ResponseSpecialtyInsert();
         
+        if (repositorySpecialty.existsByNameIgnoreCase(request.getName().trim())) {
+            response.listMessage.add("Ya existe una especialidad con este nombre.");
+            return response;
+        }
+
         EntitySpecialty specialty = new EntitySpecialty();
         specialty.setIdSpecialty(java.util.UUID.randomUUID().toString());
         specialty.setName(request.getName());
@@ -53,6 +58,11 @@ public class BusinessSpecialty {
         java.util.Optional<EntitySpecialty> optional = repositorySpecialty.findById(request.getIdSpecialty());
         if (optional.isEmpty()) {
             response.listMessage.add("La especialidad no existe.");
+            return response;
+        }
+
+        if (repositorySpecialty.existsByNameIgnoreCaseAndIdSpecialtyNot(request.getName().trim(), request.getIdSpecialty())) {
+            response.listMessage.add("Ya existe otra especialidad con este nombre.");
             return response;
         }
 

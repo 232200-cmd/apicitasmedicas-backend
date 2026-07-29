@@ -1,0 +1,10 @@
+com\epiis\apicitasmedicas\dto\request\RequestDoctorUpdate.class
+com\epiis\apicitasmedicas\dto\response\ResponseDoctorDelete.class
+com\epiis\apicitasmedicas\dto\response\ResponseSpecialtyUpdate.class
+com\epiis\apicitasmedicas\dto\request\RequestSpecialtyInsert.class
+com\epiis\apicitasmedicas\dto\request\RequestDoctorInsert.class
+com\epiis\apicitasmedicas\dto\response\ResponseSpecialtyDelete.class
+com\epiis\apicitasmedicas\dto\response\ResponseDoctorUpdate.class
+com\epiis\apicitasmedicas\dto\request\RequestSpecialtyUpdate.class
+com\epiis\apicitasmedicas\dto\response\ResponseSpecialtyInsert.class
+com\epiis\apicitasmedicas\dto\response\ResponseDoctorInsert.class

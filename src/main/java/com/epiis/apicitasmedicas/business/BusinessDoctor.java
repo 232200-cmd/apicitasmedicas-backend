@@ -32,7 +32,18 @@ public class BusinessDoctor {
             data.put("firstName", item.getFirstName());
             data.put("surName", item.getSurName());
             data.put("email", item.getEmail());
+            data.put("phoneNumber", item.getPhoneNumber());
             data.put("fullName", item.getFirstName() + " " + item.getSurName());
+
+            List<EntityDoctorSpecialty> relations = repositoryDoctorSpecialty.findByIdDoctor(item.getIdDoctor());
+            if (!relations.isEmpty() && relations.get(0).getParentSpecialty() != null) {
+                data.put("specialtyName", relations.get(0).getParentSpecialty().getName());
+                data.put("idSpecialty", relations.get(0).getIdSpecialty());
+            } else {
+                data.put("specialtyName", "");
+                data.put("idSpecialty", "");
+            }
+
             response.getListDoctor().add(data);
         }
         response.success();
@@ -64,6 +75,11 @@ public class BusinessDoctor {
     public com.epiis.apicitasmedicas.dto.response.ResponseDoctorInsert insert(com.epiis.apicitasmedicas.dto.request.RequestDoctorInsert request) {
         com.epiis.apicitasmedicas.dto.response.ResponseDoctorInsert response = new com.epiis.apicitasmedicas.dto.response.ResponseDoctorInsert();
         
+        if (repositoryDoctor.existsByEmail(request.getEmail().trim())) {
+            response.listMessage.add("El email ya está registrado.");
+            return response;
+        }
+
         EntityDoctor doctor = new EntityDoctor();
         doctor.setIdDoctor(java.util.UUID.randomUUID().toString());
         doctor.setFirstName(request.getFirstName());
@@ -98,6 +114,11 @@ public class BusinessDoctor {
             return response;
         }
 
+        if (repositoryDoctor.existsByEmailAndIdDoctorNot(request.getEmail().trim(), request.getIdDoctor())) {
+            response.listMessage.add("El email ya está registrado por otro doctor.");
+            return response;
+        }
+
         EntityDoctor doctor = optional.get();
         doctor.setFirstName(request.getFirstName());
         doctor.setSurName(request.getSurName());
@@ -107,7 +128,6 @@ public class BusinessDoctor {
         
         repositoryDoctor.save(doctor);
         
-        // Update specialty
         List<EntityDoctorSpecialty> relations = repositoryDoctorSpecialty.findByIdDoctor(request.getIdDoctor());
         if (!relations.isEmpty()) {
             EntityDoctorSpecialty doctorSpecialty = relations.get(0);
@@ -140,7 +160,6 @@ public class BusinessDoctor {
         }
 
         try {
-            // Eliminar relacion primero
             List<EntityDoctorSpecialty> relations = repositoryDoctorSpecialty.findByIdDoctor(idDoctor);
             repositoryDoctorSpecialty.deleteAll(relations);
             
