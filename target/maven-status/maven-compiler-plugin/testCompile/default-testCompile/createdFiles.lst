@@ -1,0 +1,12 @@
+com\epiis\apicitasmedicas\helper\GenericHelperTest.class
+com\epiis\apicitasmedicas\business\BusinessAuthTest.class
+com\epiis\apicitasmedicas\business\BusinessSpecialtyTest.class
+com\epiis\apicitasmedicas\security\JwtUtilTest.class
+com\epiis\apicitasmedicas\security\SecurityUtilTest.class
+com\epiis\apicitasmedicas\business\BusinessAppointmentTest.class
+com\epiis\apicitasmedicas\controller\AppointmentControllerTest.class
+com\epiis\apicitasmedicas\controller\AppointmentFileControllerTest.class
+com\epiis\apicitasmedicas\controller\AuthControllerTest.class
+com\epiis\apicitasmedicas\controller\DoctorControllerTest.class
+com\epiis\apicitasmedicas\controller\SpecialtyControllerTest.class
+com\epiis\apicitasmedicas\business\BusinessDoctorTest.class

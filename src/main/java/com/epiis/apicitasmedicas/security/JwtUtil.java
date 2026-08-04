@@ -1,10 +1,12 @@
 package com.epiis.apicitasmedicas.security;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.function.Function;
 
 import javax.crypto.SecretKey;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
@@ -14,14 +16,14 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class JwtUtil {
 
-    // Clave secreta para firmar el token. En producción, esto debería ir en application.properties
-    private static final String SECRET_KEY = "MediCitaSecretKeyParaFirmarTokensJWT2026MuySeguraYLarga";
+    @Value("${jwt.secret:MediCitaSecretKeyParaFirmarTokensJWT2026ErickZunigaEspinoza}")
+    private String secretKey;
 
     // Duración del token: 24 horas
-    private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 24;
+    private static final long EXPIRATION_TIME = 1000L * 60 * 60 * 24;
 
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+        return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
     public String generateToken(String idUser, String email, String role) {
@@ -29,8 +31,8 @@ public class JwtUtil {
                 .subject(idUser)
                 .claim("email", email)
                 .claim("role", role)
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .issuedAt(Date.from(Instant.now()))
+                .expiration(Date.from(Instant.now().plusMillis(EXPIRATION_TIME)))
                 .signWith(getSigningKey())
                 .compact();
     }
@@ -65,7 +67,7 @@ public class JwtUtil {
     }
 
     public boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+        return extractExpiration(token).before(Date.from(Instant.now()));
     }
 
     public boolean validateToken(String token) {

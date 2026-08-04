@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.epiis.apicitasmedicas.business.BusinessDoctorTest
+-------------------------------------------------------------------------------
+Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.405 s -- in com.epiis.apicitasmedicas.business.BusinessDoctorTest

@@ -87,23 +87,13 @@ public class BusinessDoctor {
 
         EntityDoctor doctor = new EntityDoctor();
         doctor.setIdDoctor(java.util.UUID.randomUUID().toString());
-        doctor.setFirstName(request.getFirstName());
-        doctor.setSurName(request.getSurName());
-        doctor.setEmail(request.getEmail());
-        doctor.setPhoneNumber(request.getPhoneNumber());
+        mapRequestToDoctor(doctor, request);
         doctor.setCreatedAt(new java.util.Date());
         doctor.setUpdatedAt(new java.util.Date());
         
         repositoryDoctor.save(doctor);
 
-        EntityDoctorSpecialty doctorSpecialty = new EntityDoctorSpecialty();
-        doctorSpecialty.setIdDoctorSpecialty(java.util.UUID.randomUUID().toString());
-        doctorSpecialty.setIdDoctor(doctor.getIdDoctor());
-        doctorSpecialty.setIdSpecialty(request.getIdSpecialty());
-        doctorSpecialty.setCreatedAt(new java.util.Date());
-        doctorSpecialty.setUpdatedAt(new java.util.Date());
-        
-        repositoryDoctorSpecialty.save(doctorSpecialty);
+        createDoctorSpecialty(doctor, request.getIdSpecialty());
         
         response.listMessage.add("Doctor insertado correctamente.");
         response.success();
@@ -130,10 +120,7 @@ public class BusinessDoctor {
         }
 
         EntityDoctor doctor = optional.get();
-        doctor.setFirstName(request.getFirstName());
-        doctor.setSurName(request.getSurName());
-        doctor.setEmail(request.getEmail());
-        doctor.setPhoneNumber(request.getPhoneNumber());
+        mapRequestToDoctor(doctor, request);
         doctor.setUpdatedAt(new java.util.Date());
         
         repositoryDoctor.save(doctor);
@@ -147,13 +134,7 @@ public class BusinessDoctor {
                 repositoryDoctorSpecialty.save(doctorSpecialty);
             }
         } else {
-            EntityDoctorSpecialty doctorSpecialty = new EntityDoctorSpecialty();
-            doctorSpecialty.setIdDoctorSpecialty(java.util.UUID.randomUUID().toString());
-            doctorSpecialty.setIdDoctor(doctor.getIdDoctor());
-            doctorSpecialty.setIdSpecialty(request.getIdSpecialty());
-            doctorSpecialty.setCreatedAt(new java.util.Date());
-            doctorSpecialty.setUpdatedAt(new java.util.Date());
-            repositoryDoctorSpecialty.save(doctorSpecialty);
+            createDoctorSpecialty(doctor, request.getIdSpecialty());
         }
         
         response.listMessage.add("Doctor actualizado correctamente.");
@@ -182,5 +163,22 @@ public class BusinessDoctor {
         }
         
         return response;
+    }
+
+    private void mapRequestToDoctor(EntityDoctor doctor, com.epiis.apicitasmedicas.dto.request.RequestDoctorBase request) {
+        doctor.setFirstName(request.getFirstName());
+        doctor.setSurName(request.getSurName());
+        doctor.setEmail(request.getEmail());
+        doctor.setPhoneNumber(request.getPhoneNumber());
+    }
+
+    private void createDoctorSpecialty(EntityDoctor doctor, String idSpecialty) {
+        EntityDoctorSpecialty doctorSpecialty = new EntityDoctorSpecialty();
+        doctorSpecialty.setIdDoctorSpecialty(java.util.UUID.randomUUID().toString());
+        doctorSpecialty.setIdDoctor(doctor.getIdDoctor());
+        doctorSpecialty.setIdSpecialty(idSpecialty);
+        doctorSpecialty.setCreatedAt(new java.util.Date());
+        doctorSpecialty.setUpdatedAt(new java.util.Date());
+        repositoryDoctorSpecialty.save(doctorSpecialty);
     }
 }

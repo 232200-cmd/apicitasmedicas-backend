@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BusinessAppointment.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">apicitasmedicas</a> &gt; <a href="index.source.html" class="el_package">com.epiis.apicitasmedicas.business</a> &gt; <span class="el_source">BusinessAppointment.java</span></div><h1>BusinessAppointment.java</h1><pre class="source lang-java linenums">package com.epiis.apicitasmedicas.business;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.epiis.apicitasmedicas.dto.request.RequestAppointmentComment;
+import com.epiis.apicitasmedicas.dto.request.RequestAppointmentInsert;
+import com.epiis.apicitasmedicas.dto.response.ResponseAppointmentClose;
+import com.epiis.apicitasmedicas.dto.response.ResponseAppointmentComment;
+import com.epiis.apicitasmedicas.dto.response.ResponseAppointmentCoordination;
+import com.epiis.apicitasmedicas.dto.response.ResponseAppointmentGetAll;
+import com.epiis.apicitasmedicas.dto.response.ResponseAppointmentInsert;
+import com.epiis.apicitasmedicas.dto.response.ResponseAppointmentReject;
+import com.epiis.apicitasmedicas.dto.response.ResponseAppointmentSeen;
+import com.epiis.apicitasmedicas.entity.EntityAppointment;
+import com.epiis.apicitasmedicas.entity.EntityAppointmentComment;
+import com.epiis.apicitasmedicas.entity.EntityAppointmentFile;
+import com.epiis.apicitasmedicas.helper.GenericHelper;
+import com.epiis.apicitasmedicas.repository.RepositoryAppointment;
+import com.epiis.apicitasmedicas.repository.RepositoryAppointmentComment;
+import com.epiis.apicitasmedicas.repository.RepositoryAppointmentFile;
+import com.epiis.apicitasmedicas.security.SecurityUtil;
+import com.epiis.apicitasmedicas.staticdata.EnumProcess;
+
+@Service
+public class BusinessAppointment {
+    private final RepositoryAppointment repositoryAppointment;
+    private final RepositoryAppointmentFile repositoryAppointmentFile;
+    private final RepositoryAppointmentComment repositoryAppointmentComment;
+
+    public BusinessAppointment(
+        RepositoryAppointment repositoryAppointment,
+        RepositoryAppointmentFile repositoryAppointmentFile,
+        RepositoryAppointmentComment repositoryAppointmentComment
+<span class="fc" id="L45">    ) {</span>
+<span class="fc" id="L46">        this.repositoryAppointment = repositoryAppointment;</span>
+<span class="fc" id="L47">        this.repositoryAppointmentFile = repositoryAppointmentFile;</span>
+<span class="fc" id="L48">        this.repositoryAppointmentComment = repositoryAppointmentComment;</span>
+<span class="fc" id="L49">    }</span>
+
+    public ResponseAppointmentInsert insert(RequestAppointmentInsert request) throws IOException {
+<span class="fc" id="L52">        ResponseAppointmentInsert response = new ResponseAppointmentInsert();</span>
+
+        // Validación de fecha pasada
+<span class="fc bfc" id="L55" title="All 2 branches covered.">        if (request.getPreferredDate().before(new Date())) {</span>
+<span class="fc" id="L56">            response.error();</span>
+<span class="fc" id="L57">            response.listMessage.add(&quot;No puede solicitar una cita en una fecha u hora pasada.&quot;);</span>
+<span class="fc" id="L58">            return response;</span>
+        }
+
+        // Validación de choque de horarios (Margen de 30 minutos)
+<span class="fc" id="L62">        long thirtyMinutesMillis = 30L * 60 * 1000;</span>
+<span class="fc" id="L63">        Date startTime = new Date(request.getPreferredDate().getTime() - thirtyMinutesMillis);</span>
+<span class="fc" id="L64">        Date endTime = new Date(request.getPreferredDate().getTime() + thirtyMinutesMillis);</span>
+        
+<span class="fc" id="L66">        int conflicts = repositoryAppointment.countConflictingAppointments(</span>
+<span class="fc" id="L67">            request.getIdDoctor(), </span>
+            startTime, 
+            endTime, 
+<span class="fc" id="L70">            EnumProcess.REFUSED.toString(), </span>
+<span class="fc" id="L71">            EnumProcess.CLOSE.toString()</span>
+        );
+<span class="fc bfc" id="L73" title="All 2 branches covered.">        if (conflicts &gt; 0) {</span>
+<span class="fc" id="L74">            response.error();</span>
+<span class="fc" id="L75">            response.listMessage.add(&quot;El doctor ya tiene una cita programada en ese horario. Por favor elija otra hora (margen de 30 min).&quot;);</span>
+<span class="fc" id="L76">            return response;</span>
+        }
+
+<span class="fc" id="L79">        EntityAppointment entity = new EntityAppointment();</span>
+<span class="fc" id="L80">        entity.setIdAppointment(UUID.randomUUID().toString());</span>
+<span class="fc" id="L81">        entity.setIdSpecialty(request.getIdSpecialty());</span>
+<span class="fc" id="L82">        entity.setIdDoctor(request.getIdDoctor());</span>
+<span class="fc" id="L83">        entity.setIdUser(SecurityUtil.getCurrentUserId());</span>
+<span class="fc" id="L84">        entity.setCode(GenericHelper.followCodeGeneration());</span>
+<span class="fc" id="L85">        entity.setPersonFullName(request.getPersonFullName());</span>
+<span class="fc" id="L86">        entity.setDescription(request.getDescription());</span>
+<span class="fc" id="L87">        entity.setPreferredDate(request.getPreferredDate());</span>
+<span class="fc" id="L88">        entity.setStatus(EnumProcess.PENDING.toString());</span>
+<span class="fc" id="L89">        entity.setCreatedAt(new java.sql.Date(new Date().getTime()));</span>
+<span class="fc" id="L90">        entity.setUpdatedAt(entity.getCreatedAt());</span>
+
+<span class="fc" id="L92">        repositoryAppointment.save(entity);</span>
+
+<span class="fc bfc" id="L94" title="All 2 branches covered.">        if (request.getFiles() != null) {</span>
+<span class="fc" id="L95">            Path basePath = Paths.get(&quot;storage/appointmentfile&quot;);</span>
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">            if (!Files.exists(basePath)) {</span>
+<span class="nc" id="L97">                Files.createDirectories(basePath);</span>
+            }
+
+<span class="fc" id="L100">            List&lt;EntityAppointmentFile&gt; listFiles = new ArrayList&lt;&gt;();</span>
+
+<span class="fc bfc" id="L102" title="All 2 branches covered.">            for (var file : request.getFiles()) {</span>
+<span class="fc" id="L103">                EntityAppointmentFile entityFile = new EntityAppointmentFile();</span>
+<span class="fc" id="L104">                entityFile.setIdAppointmentfile(UUID.randomUUID().toString());</span>
+<span class="fc" id="L105">                entityFile.setIdAppointment(entity.getIdAppointment());</span>
+<span class="fc" id="L106">                entityFile.setName(file.getOriginalFilename());</span>
+<span class="fc" id="L107">                entityFile.setExtension(entityFile.getName().substring(entityFile.getName().lastIndexOf(&quot;.&quot;) + 1).toLowerCase());</span>
+<span class="fc" id="L108">                entityFile.setCreatedAt(entity.getCreatedAt());</span>
+<span class="fc" id="L109">                entityFile.setUpdatedAt(entity.getCreatedAt());</span>
+<span class="fc" id="L110">                listFiles.add(entityFile);</span>
+<span class="fc" id="L111">                Files.copy(file.getInputStream(), basePath.resolve(entityFile.getIdAppointmentfile() + &quot;.&quot; + entityFile.getExtension()));</span>
+<span class="fc" id="L112">            }</span>
+
+<span class="fc" id="L114">            repositoryAppointmentFile.saveAll(listFiles);</span>
+        }
+
+<span class="fc" id="L117">        response.success();</span>
+<span class="fc" id="L118">        response.listMessage.add(&quot;Solicitud de cita registrada correctamente.&quot;);</span>
+<span class="fc" id="L119">        return response;</span>
+    }
+
+    public ResponseAppointmentGetAll getAll() {
+<span class="fc" id="L123">        ResponseAppointmentGetAll response = new ResponseAppointmentGetAll();</span>
+
+<span class="fc" id="L125">        String role = SecurityUtil.getCurrentUserRole();</span>
+<span class="fc bfc" id="L126" title="All 2 branches covered.">        List&lt;EntityAppointment&gt; list = &quot;ADMINISTRADOR&quot;.equalsIgnoreCase(role)</span>
+<span class="fc" id="L127">            ? repositoryAppointment.findAll()</span>
+<span class="fc" id="L128">            : repositoryAppointment.findByIdUser(SecurityUtil.getCurrentUserId());</span>
+
+<span class="fc bfc" id="L130" title="All 2 branches covered.">        for (EntityAppointment item : list) {</span>
+<span class="fc" id="L131">            response.getListAppointment().add(mapAppointmentToData(item));</span>
+<span class="fc" id="L132">        }</span>
+
+<span class="fc" id="L134">        response.success();</span>
+<span class="fc" id="L135">        return response;</span>
+    }
+
+    private Map&lt;String, Object&gt; mapAppointmentToData(EntityAppointment item) {
+<span class="fc" id="L139">        Map&lt;String, Object&gt; data = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L140">        data.put(&quot;idAppointment&quot;, item.getIdAppointment());</span>
+<span class="fc" id="L141">        data.put(&quot;code&quot;, item.getCode());</span>
+<span class="fc" id="L142">        data.put(&quot;personFullName&quot;, item.getPersonFullName());</span>
+<span class="fc" id="L143">        data.put(&quot;description&quot;, item.getDescription());</span>
+<span class="fc" id="L144">        data.put(&quot;preferredDate&quot;, item.getPreferredDate());</span>
+<span class="fc" id="L145">        data.put(&quot;status&quot;, item.getStatus());</span>
+<span class="fc bfc" id="L146" title="All 2 branches covered.">        data.put(&quot;specialtyName&quot;, item.getParentSpecialty() != null ? item.getParentSpecialty().getName() : &quot;&quot;);</span>
+<span class="fc bfc" id="L147" title="All 2 branches covered.">        data.put(&quot;doctorFullName&quot;, item.getParentDoctor() != null ? item.getParentDoctor().getFirstName() + &quot; &quot; + item.getParentDoctor().getSurName() : &quot;&quot;);</span>
+
+<span class="fc" id="L149">        List&lt;Map&lt;String, String&gt;&gt; listFiles = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L150" title="All 2 branches covered.">        if (item.getChildAppointmentFile() != null) {</span>
+<span class="fc bfc" id="L151" title="All 2 branches covered.">            for (EntityAppointmentFile f : item.getChildAppointmentFile()) {</span>
+<span class="fc" id="L152">                Map&lt;String, String&gt; fileData = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L153">                fileData.put(&quot;idAppointmentfile&quot;, f.getIdAppointmentfile());</span>
+<span class="fc" id="L154">                fileData.put(&quot;name&quot;, f.getName());</span>
+<span class="fc" id="L155">                fileData.put(&quot;extension&quot;, f.getExtension());</span>
+<span class="fc" id="L156">                listFiles.add(fileData);</span>
+<span class="fc" id="L157">            }</span>
+        }
+<span class="fc" id="L159">        data.put(&quot;files&quot;, listFiles);</span>
+
+<span class="fc" id="L161">        List&lt;Map&lt;String, Object&gt;&gt; listComments = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L162" title="All 2 branches covered.">        if (item.getChildAppointmentComment() != null) {</span>
+<span class="fc bfc" id="L163" title="All 2 branches covered.">            for (EntityAppointmentComment c : item.getChildAppointmentComment()) {</span>
+<span class="fc" id="L164">                Map&lt;String, Object&gt; commentData = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L165">                commentData.put(&quot;idAppointmentcomment&quot;, c.getIdAppointmentcomment());</span>
+<span class="fc" id="L166">                commentData.put(&quot;description&quot;, c.getDescription());</span>
+<span class="fc" id="L167">                commentData.put(&quot;createdAt&quot;, c.getCreatedAt());</span>
+<span class="fc" id="L168">                listComments.add(commentData);</span>
+<span class="fc" id="L169">            }</span>
+        }
+<span class="fc" id="L171">        data.put(&quot;comments&quot;, listComments);</span>
+<span class="fc" id="L172">        return data;</span>
+    }
+
+    public ResponseAppointmentSeen seen(String idAppointment) {
+<span class="fc" id="L176">        ResponseAppointmentSeen response = new ResponseAppointmentSeen();</span>
+<span class="fc" id="L177">        repositoryAppointment.findById(idAppointment).ifPresent(entity -&gt; {</span>
+<span class="fc" id="L178">            entity.setStatus(EnumProcess.SEEN.toString());</span>
+<span class="fc" id="L179">            entity.setUpdatedAt(new java.sql.Date(new Date().getTime()));</span>
+<span class="fc" id="L180">            repositoryAppointment.save(entity);</span>
+<span class="fc" id="L181">        });</span>
+<span class="fc" id="L182">        response.success();</span>
+<span class="fc" id="L183">        response.listMessage.add(&quot;Cita marcada como vista.&quot;);</span>
+<span class="fc" id="L184">        return response;</span>
+    }
+
+    public ResponseAppointmentCoordination coordination(String idAppointment) {
+<span class="fc" id="L188">        ResponseAppointmentCoordination response = new ResponseAppointmentCoordination();</span>
+<span class="fc" id="L189">        repositoryAppointment.findById(idAppointment).ifPresent(entity -&gt; {</span>
+<span class="fc" id="L190">            entity.setStatus(EnumProcess.COORDINATION.toString());</span>
+<span class="fc" id="L191">            entity.setUpdatedAt(new java.sql.Date(new Date().getTime()));</span>
+<span class="fc" id="L192">            repositoryAppointment.save(entity);</span>
+<span class="fc" id="L193">        });</span>
+<span class="fc" id="L194">        response.success();</span>
+<span class="fc" id="L195">        response.listMessage.add(&quot;Cita en coordinación.&quot;);</span>
+<span class="fc" id="L196">        return response;</span>
+    }
+
+    public ResponseAppointmentReject reject(String idAppointment) {
+<span class="fc" id="L200">        ResponseAppointmentReject response = new ResponseAppointmentReject();</span>
+<span class="fc" id="L201">        repositoryAppointment.findById(idAppointment).ifPresent(entity -&gt; {</span>
+<span class="fc" id="L202">            entity.setStatus(EnumProcess.REFUSED.toString());</span>
+<span class="fc" id="L203">            entity.setUpdatedAt(new java.sql.Date(new Date().getTime()));</span>
+<span class="fc" id="L204">            repositoryAppointment.save(entity);</span>
+<span class="fc" id="L205">        });</span>
+<span class="fc" id="L206">        response.success();</span>
+<span class="fc" id="L207">        response.listMessage.add(&quot;Cita rechazada.&quot;);</span>
+<span class="fc" id="L208">        return response;</span>
+    }
+
+    public ResponseAppointmentClose close(String idAppointment) {
+<span class="fc" id="L212">        ResponseAppointmentClose response = new ResponseAppointmentClose();</span>
+<span class="fc" id="L213">        repositoryAppointment.findById(idAppointment).ifPresent(entity -&gt; {</span>
+<span class="fc" id="L214">            entity.setStatus(EnumProcess.CLOSE.toString());</span>
+<span class="fc" id="L215">            entity.setUpdatedAt(new java.sql.Date(new Date().getTime()));</span>
+<span class="fc" id="L216">            repositoryAppointment.save(entity);</span>
+<span class="fc" id="L217">        });</span>
+<span class="fc" id="L218">        response.success();</span>
+<span class="fc" id="L219">        response.listMessage.add(&quot;Cita cerrada correctamente.&quot;);</span>
+<span class="fc" id="L220">        return response;</span>
+    }
+
+    public ResponseAppointmentComment comment(RequestAppointmentComment request) {
+<span class="fc" id="L224">        ResponseAppointmentComment response = new ResponseAppointmentComment();</span>
+<span class="fc" id="L225">        EntityAppointmentComment entity = new EntityAppointmentComment();</span>
+<span class="fc" id="L226">        entity.setIdAppointmentcomment(UUID.randomUUID().toString());</span>
+<span class="fc" id="L227">        entity.setIdAppointment(request.getIdAppointment());</span>
+<span class="fc" id="L228">        entity.setIdUser(SecurityUtil.getCurrentUserId());</span>
+<span class="fc" id="L229">        entity.setDescription(request.getDescription());</span>
+<span class="fc" id="L230">        entity.setCreatedAt(new java.sql.Date(new Date().getTime()));</span>
+<span class="fc" id="L231">        entity.setUpdatedAt(entity.getCreatedAt());</span>
+<span class="fc" id="L232">        repositoryAppointmentComment.save(entity);</span>
+<span class="fc" id="L233">        response.success();</span>
+<span class="fc" id="L234">        response.listMessage.add(&quot;Comentario registrado correctamente.&quot;);</span>
+<span class="fc" id="L235">        return response;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

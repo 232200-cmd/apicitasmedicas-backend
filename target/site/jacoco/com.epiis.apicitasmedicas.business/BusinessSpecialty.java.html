@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BusinessSpecialty.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">apicitasmedicas</a> &gt; <a href="index.source.html" class="el_package">com.epiis.apicitasmedicas.business</a> &gt; <span class="el_source">BusinessSpecialty.java</span></div><h1>BusinessSpecialty.java</h1><pre class="source lang-java linenums">package com.epiis.apicitasmedicas.business;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
+
+import com.epiis.apicitasmedicas.dto.response.ResponseSpecialtyGetAll;
+import com.epiis.apicitasmedicas.entity.EntitySpecialty;
+import com.epiis.apicitasmedicas.repository.RepositorySpecialty;
+
+@Service
+public class BusinessSpecialty {
+    private final RepositorySpecialty repositorySpecialty;
+
+<span class="fc" id="L17">    public BusinessSpecialty(RepositorySpecialty repositorySpecialty) {</span>
+<span class="fc" id="L18">        this.repositorySpecialty = repositorySpecialty;</span>
+<span class="fc" id="L19">    }</span>
+
+    public ResponseSpecialtyGetAll getAll() {
+<span class="fc" id="L22">        ResponseSpecialtyGetAll response = new ResponseSpecialtyGetAll();</span>
+<span class="fc" id="L23">        List&lt;EntitySpecialty&gt; list = repositorySpecialty.findAll();</span>
+<span class="fc bfc" id="L24" title="All 2 branches covered.">        for (EntitySpecialty item : list) {</span>
+<span class="fc" id="L25">            Map&lt;String, Object&gt; data = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L26">            data.put(&quot;idSpecialty&quot;, item.getIdSpecialty());</span>
+<span class="fc" id="L27">            data.put(&quot;name&quot;, item.getName());</span>
+<span class="fc" id="L28">            response.getListSpecialty().add(data);</span>
+<span class="fc" id="L29">        }</span>
+<span class="fc" id="L30">        response.success();</span>
+<span class="fc" id="L31">        return response;</span>
+    }
+
+    public com.epiis.apicitasmedicas.dto.response.ResponseSpecialtyInsert insert(com.epiis.apicitasmedicas.dto.request.RequestSpecialtyInsert request) {
+<span class="fc" id="L35">        com.epiis.apicitasmedicas.dto.response.ResponseSpecialtyInsert response = new com.epiis.apicitasmedicas.dto.response.ResponseSpecialtyInsert();</span>
+        
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        if (repositorySpecialty.existsByNameIgnoreCase(request.getName().trim())) {</span>
+<span class="fc" id="L38">            response.listMessage.add(&quot;Ya existe una especialidad con este nombre.&quot;);</span>
+<span class="fc" id="L39">            return response;</span>
+        }
+
+<span class="fc" id="L42">        EntitySpecialty specialty = new EntitySpecialty();</span>
+<span class="fc" id="L43">        specialty.setIdSpecialty(java.util.UUID.randomUUID().toString());</span>
+<span class="fc" id="L44">        specialty.setName(request.getName());</span>
+<span class="fc" id="L45">        specialty.setCreatedAt(new java.util.Date());</span>
+<span class="fc" id="L46">        specialty.setUpdatedAt(new java.util.Date());</span>
+        
+<span class="fc" id="L48">        repositorySpecialty.save(specialty);</span>
+        
+<span class="fc" id="L50">        response.listMessage.add(&quot;Especialidad insertada correctamente.&quot;);</span>
+<span class="fc" id="L51">        response.success();</span>
+<span class="fc" id="L52">        return response;</span>
+    }
+
+    public com.epiis.apicitasmedicas.dto.response.ResponseSpecialtyUpdate update(com.epiis.apicitasmedicas.dto.request.RequestSpecialtyUpdate request) {
+<span class="fc" id="L56">        com.epiis.apicitasmedicas.dto.response.ResponseSpecialtyUpdate response = new com.epiis.apicitasmedicas.dto.response.ResponseSpecialtyUpdate();</span>
+        
+<span class="fc" id="L58">        java.util.Optional&lt;EntitySpecialty&gt; optional = repositorySpecialty.findById(request.getIdSpecialty());</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">        if (optional.isEmpty()) {</span>
+<span class="fc" id="L60">            response.listMessage.add(&quot;La especialidad no existe.&quot;);</span>
+<span class="fc" id="L61">            return response;</span>
+        }
+
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        if (repositorySpecialty.existsByNameIgnoreCaseAndIdSpecialtyNot(request.getName().trim(), request.getIdSpecialty())) {</span>
+<span class="fc" id="L65">            response.listMessage.add(&quot;Ya existe otra especialidad con este nombre.&quot;);</span>
+<span class="fc" id="L66">            return response;</span>
+        }
+
+<span class="fc" id="L69">        EntitySpecialty specialty = optional.get();</span>
+<span class="fc" id="L70">        specialty.setName(request.getName());</span>
+<span class="fc" id="L71">        specialty.setUpdatedAt(new java.util.Date());</span>
+        
+<span class="fc" id="L73">        repositorySpecialty.save(specialty);</span>
+        
+<span class="fc" id="L75">        response.listMessage.add(&quot;Especialidad actualizada correctamente.&quot;);</span>
+<span class="fc" id="L76">        response.success();</span>
+<span class="fc" id="L77">        return response;</span>
+    }
+
+    public com.epiis.apicitasmedicas.dto.response.ResponseSpecialtyDelete delete(String idSpecialty) {
+<span class="fc" id="L81">        com.epiis.apicitasmedicas.dto.response.ResponseSpecialtyDelete response = new com.epiis.apicitasmedicas.dto.response.ResponseSpecialtyDelete();</span>
+        
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        if (!repositorySpecialty.existsById(idSpecialty)) {</span>
+<span class="fc" id="L84">            response.listMessage.add(&quot;La especialidad no existe.&quot;);</span>
+<span class="fc" id="L85">            return response;</span>
+        }
+
+        try {
+<span class="fc" id="L89">            repositorySpecialty.deleteById(idSpecialty);</span>
+<span class="fc" id="L90">            response.listMessage.add(&quot;Especialidad eliminada correctamente.&quot;);</span>
+<span class="fc" id="L91">            response.success();</span>
+<span class="fc" id="L92">        } catch (Exception e) {</span>
+<span class="fc" id="L93">            response.listMessage.add(&quot;No se puede eliminar la especialidad porque está siendo utilizada.&quot;);</span>
+<span class="fc" id="L94">        }</span>
+        
+<span class="fc" id="L96">        return response;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

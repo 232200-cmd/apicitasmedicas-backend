@@ -59,7 +59,7 @@ public class BusinessAppointment {
         }
 
         // Validación de choque de horarios (Margen de 30 minutos)
-        long thirtyMinutesMillis = 30 * 60 * 1000;
+        long thirtyMinutesMillis = 30L * 60 * 1000;
         Date startTime = new Date(request.getPreferredDate().getTime() - thirtyMinutesMillis);
         Date endTime = new Date(request.getPreferredDate().getTime() + thirtyMinutesMillis);
         
@@ -128,45 +128,48 @@ public class BusinessAppointment {
             : repositoryAppointment.findByIdUser(SecurityUtil.getCurrentUserId());
 
         for (EntityAppointment item : list) {
-            Map<String, Object> data = new HashMap<>();
-            data.put("idAppointment", item.getIdAppointment());
-            data.put("code", item.getCode());
-            data.put("personFullName", item.getPersonFullName());
-            data.put("description", item.getDescription());
-            data.put("preferredDate", item.getPreferredDate());
-            data.put("status", item.getStatus());
-            data.put("specialtyName", item.getParentSpecialty() != null ? item.getParentSpecialty().getName() : "");
-            data.put("doctorFullName", item.getParentDoctor() != null ? item.getParentDoctor().getFirstName() + " " + item.getParentDoctor().getSurName() : "");
-
-            List<Map<String, String>> listFiles = new ArrayList<>();
-            if (item.getChildAppointmentFile() != null) {
-                for (EntityAppointmentFile f : item.getChildAppointmentFile()) {
-                    Map<String, String> fileData = new HashMap<>();
-                    fileData.put("idAppointmentfile", f.getIdAppointmentfile());
-                    fileData.put("name", f.getName());
-                    fileData.put("extension", f.getExtension());
-                    listFiles.add(fileData);
-                }
-            }
-            data.put("files", listFiles);
-
-            List<Map<String, Object>> listComments = new ArrayList<>();
-            if (item.getChildAppointmentComment() != null) {
-                for (EntityAppointmentComment c : item.getChildAppointmentComment()) {
-                    Map<String, Object> commentData = new HashMap<>();
-                    commentData.put("idAppointmentcomment", c.getIdAppointmentcomment());
-                    commentData.put("description", c.getDescription());
-                    commentData.put("createdAt", c.getCreatedAt());
-                    listComments.add(commentData);
-                }
-            }
-            data.put("comments", listComments);
-
-            response.getListAppointment().add(data);
+            response.getListAppointment().add(mapAppointmentToData(item));
         }
 
         response.success();
         return response;
+    }
+
+    private Map<String, Object> mapAppointmentToData(EntityAppointment item) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("idAppointment", item.getIdAppointment());
+        data.put("code", item.getCode());
+        data.put("personFullName", item.getPersonFullName());
+        data.put("description", item.getDescription());
+        data.put("preferredDate", item.getPreferredDate());
+        data.put("status", item.getStatus());
+        data.put("specialtyName", item.getParentSpecialty() != null ? item.getParentSpecialty().getName() : "");
+        data.put("doctorFullName", item.getParentDoctor() != null ? item.getParentDoctor().getFirstName() + " " + item.getParentDoctor().getSurName() : "");
+
+        List<Map<String, String>> listFiles = new ArrayList<>();
+        if (item.getChildAppointmentFile() != null) {
+            for (EntityAppointmentFile f : item.getChildAppointmentFile()) {
+                Map<String, String> fileData = new HashMap<>();
+                fileData.put("idAppointmentfile", f.getIdAppointmentfile());
+                fileData.put("name", f.getName());
+                fileData.put("extension", f.getExtension());
+                listFiles.add(fileData);
+            }
+        }
+        data.put("files", listFiles);
+
+        List<Map<String, Object>> listComments = new ArrayList<>();
+        if (item.getChildAppointmentComment() != null) {
+            for (EntityAppointmentComment c : item.getChildAppointmentComment()) {
+                Map<String, Object> commentData = new HashMap<>();
+                commentData.put("idAppointmentcomment", c.getIdAppointmentcomment());
+                commentData.put("description", c.getDescription());
+                commentData.put("createdAt", c.getCreatedAt());
+                listComments.add(commentData);
+            }
+        }
+        data.put("comments", listComments);
+        return data;
     }
 
     public ResponseAppointmentSeen seen(String idAppointment) {

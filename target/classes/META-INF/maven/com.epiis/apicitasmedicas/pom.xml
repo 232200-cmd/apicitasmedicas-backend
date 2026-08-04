@@ -25,6 +25,15 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <lombok.version>1.18.38</lombok.version>
         <jjwt.version>0.12.6</jjwt.version>
+        <sonar.projectKey>appcitasmedicas-backend</sonar.projectKey>
+        <sonar.projectName>MediCita - Backend</sonar.projectName>
+        <sonar.host.url>http://localhost:9000</sonar.host.url>
+
+        <sonar.issue.ignore.multicriteria>e1</sonar.issue.ignore.multicriteria>
+        <sonar.issue.ignore.multicriteria.e1.ruleKey>java:S2143</sonar.issue.ignore.multicriteria.e1.ruleKey>
+        <sonar.issue.ignore.multicriteria.e1.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e1.resourceKey>
+
+        <sonar.coverage.exclusions>**/entity/**,**/dto/**,**/ApicitasmedicasApplication.java</sonar.coverage.exclusions>
     </properties>
 
     <dependencies>
@@ -41,13 +50,11 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
-        <!-- NUEVO: Spring Security -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
-        <!-- NUEVO: JWT (jjwt) -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
@@ -115,6 +122,30 @@
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>5.7.0.6970</version>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.12</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

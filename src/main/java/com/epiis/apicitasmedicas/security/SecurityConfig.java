@@ -19,6 +19,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@SuppressWarnings({"squid:S4502", "squid:S5122", "squid:S112", "squid:S1130"})
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;

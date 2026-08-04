@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AppointmentController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">apicitasmedicas</a> &gt; <a href="index.source.html" class="el_package">com.epiis.apicitasmedicas.controller</a> &gt; <span class="el_source">AppointmentController.java</span></div><h1>AppointmentController.java</h1><pre class="source lang-java linenums">package com.epiis.apicitasmedicas.controller;
+
+import java.beans.PropertyEditorSupport;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.epiis.apicitasmedicas.business.BusinessAppointment;
+import com.epiis.apicitasmedicas.dto.request.RequestAppointmentComment;
+import com.epiis.apicitasmedicas.dto.request.RequestAppointmentInsert;
+import com.epiis.apicitasmedicas.dto.response.ResponseAppointmentClose;
+import com.epiis.apicitasmedicas.dto.response.ResponseAppointmentComment;
+import com.epiis.apicitasmedicas.dto.response.ResponseAppointmentCoordination;
+import com.epiis.apicitasmedicas.dto.response.ResponseAppointmentGetAll;
+import com.epiis.apicitasmedicas.dto.response.ResponseAppointmentInsert;
+import com.epiis.apicitasmedicas.dto.response.ResponseAppointmentReject;
+import com.epiis.apicitasmedicas.dto.response.ResponseAppointmentSeen;
+
+import jakarta.validation.Valid;
+
+@RestController
+@RequestMapping(path = &quot;appointment&quot;)
+public class AppointmentController {
+    private final BusinessAppointment businessAppointment;
+
+<span class="fc" id="L40">    public AppointmentController(BusinessAppointment businessAppointment) {</span>
+<span class="fc" id="L41">        this.businessAppointment = businessAppointment;</span>
+<span class="fc" id="L42">    }</span>
+
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+<span class="fc" id="L46">        binder.registerCustomEditor(Date.class, new PropertyEditorSupport() {</span>
+            @Override
+            public void setAsText(String text) throws IllegalArgumentException {
+                try {
+<span class="fc bfc" id="L50" title="All 2 branches covered.">                    String cleanText = text.endsWith(&quot;Z&quot;) ? text.substring(0, text.length() - 1) : text;</span>
+<span class="fc" id="L51">                    SimpleDateFormat sdf = new SimpleDateFormat(&quot;yyyy-MM-dd'T'HH:mm:ss.SSS&quot;);</span>
+<span class="fc" id="L52">                    setValue(sdf.parse(cleanText));</span>
+<span class="fc" id="L53">                } catch (Exception e1) {</span>
+                    try {
+<span class="fc" id="L55">                        SimpleDateFormat sdf2 = new SimpleDateFormat(&quot;yyyy-MM-dd&quot;);</span>
+<span class="fc" id="L56">                        setValue(sdf2.parse(text));</span>
+<span class="fc" id="L57">                    } catch (Exception e2) {</span>
+<span class="fc" id="L58">                        throw new IllegalArgumentException(&quot;Formato de fecha no válido: &quot; + text);</span>
+<span class="fc" id="L59">                    }</span>
+<span class="fc" id="L60">                }</span>
+<span class="fc" id="L61">            }</span>
+        });
+<span class="fc" id="L63">    }</span>
+
+    // Cualquier usuario autenticado (Paciente o Administrador) puede crear una solicitud de cita
+    @PostMapping(path = &quot;insert&quot;, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity&lt;ResponseAppointmentInsert&gt; actionInsert(@Valid @ModelAttribute RequestAppointmentInsert request, BindingResult bindingResult) {
+        try {
+            ResponseAppointmentInsert response;
+<span class="fc bfc" id="L70" title="All 2 branches covered.">            if (bindingResult.hasErrors()) {</span>
+<span class="fc" id="L71">                response = new ResponseAppointmentInsert();</span>
+<span class="fc" id="L72">                bindingResult.getAllErrors().forEach(error -&gt; response.listMessage.add(error.getDefaultMessage()));</span>
+<span class="fc" id="L73">                return ResponseEntity.ok(response);</span>
+            }
+<span class="fc" id="L75">            response = businessAppointment.insert(request);</span>
+<span class="fc" id="L76">            return ResponseEntity.ok(response);</span>
+<span class="fc" id="L77">        } catch (Exception e) {</span>
+<span class="fc" id="L78">            return null;</span>
+        }
+    }
+
+    // El Paciente ve solo las suyas (filtrado en BusinessAppointment), el Admin ve todas
+    @GetMapping(path = &quot;getall&quot;)
+    public ResponseEntity&lt;ResponseAppointmentGetAll&gt; actionGetAll() {
+        try {
+<span class="fc" id="L86">            return ResponseEntity.ok(businessAppointment.getAll());</span>
+<span class="fc" id="L87">        } catch (Exception e) {</span>
+<span class="fc" id="L88">            return null;</span>
+        }
+    }
+
+    // SOLO Administrador puede cambiar estados
+    @PreAuthorize(&quot;hasRole('ADMINISTRADOR')&quot;)
+    @PatchMapping(path = &quot;seen/{idAppointment}&quot;)
+    public ResponseEntity&lt;ResponseAppointmentSeen&gt; actionSeen(@PathVariable String idAppointment) {
+        try {
+<span class="fc" id="L97">            return ResponseEntity.ok(businessAppointment.seen(idAppointment));</span>
+<span class="fc" id="L98">        } catch (Exception e) {</span>
+<span class="fc" id="L99">            return null;</span>
+        }
+    }
+
+    @PreAuthorize(&quot;hasRole('ADMINISTRADOR')&quot;)
+    @PatchMapping(path = &quot;coordination/{idAppointment}&quot;)
+    public ResponseEntity&lt;ResponseAppointmentCoordination&gt; actionCoordination(@PathVariable String idAppointment) {
+        try {
+<span class="fc" id="L107">            return ResponseEntity.ok(businessAppointment.coordination(idAppointment));</span>
+<span class="fc" id="L108">        } catch (Exception e) {</span>
+<span class="fc" id="L109">            return null;</span>
+        }
+    }
+
+    @PreAuthorize(&quot;hasRole('ADMINISTRADOR')&quot;)
+    @PatchMapping(path = &quot;reject/{idAppointment}&quot;)
+    public ResponseEntity&lt;ResponseAppointmentReject&gt; actionReject(@PathVariable String idAppointment) {
+        try {
+<span class="fc" id="L117">            return ResponseEntity.ok(businessAppointment.reject(idAppointment));</span>
+<span class="fc" id="L118">        } catch (Exception e) {</span>
+<span class="fc" id="L119">            return null;</span>
+        }
+    }
+
+    @PreAuthorize(&quot;hasRole('ADMINISTRADOR')&quot;)
+    @PatchMapping(path = &quot;close/{idAppointment}&quot;)
+    public ResponseEntity&lt;ResponseAppointmentClose&gt; actionClose(@PathVariable String idAppointment) {
+        try {
+<span class="fc" id="L127">            return ResponseEntity.ok(businessAppointment.close(idAppointment));</span>
+<span class="fc" id="L128">        } catch (Exception e) {</span>
+<span class="fc" id="L129">            return null;</span>
+        }
+    }
+
+    // SOLO Administrador puede comentar (son comentarios internos del staff)
+    @PreAuthorize(&quot;hasRole('ADMINISTRADOR')&quot;)
+    @PostMapping(path = &quot;comment/insert&quot;)
+    public ResponseEntity&lt;ResponseAppointmentComment&gt; actionComment(@Valid @RequestBody RequestAppointmentComment request, BindingResult bindingResult) {
+        try {
+            ResponseAppointmentComment response;
+<span class="fc bfc" id="L139" title="All 2 branches covered.">            if (bindingResult.hasErrors()) {</span>
+<span class="fc" id="L140">                response = new ResponseAppointmentComment();</span>
+<span class="fc" id="L141">                bindingResult.getAllErrors().forEach(error -&gt; response.listMessage.add(error.getDefaultMessage()));</span>
+<span class="fc" id="L142">                return ResponseEntity.ok(response);</span>
+            }
+<span class="fc" id="L144">            response = businessAppointment.comment(request);</span>
+<span class="fc" id="L145">            return ResponseEntity.ok(response);</span>
+<span class="fc" id="L146">        } catch (Exception e) {</span>
+<span class="fc" id="L147">            return null;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

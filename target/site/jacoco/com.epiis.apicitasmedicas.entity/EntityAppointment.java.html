@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EntityAppointment.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">apicitasmedicas</a> &gt; <a href="index.source.html" class="el_package">com.epiis.apicitasmedicas.entity</a> &gt; <span class="el_source">EntityAppointment.java</span></div><h1>EntityAppointment.java</h1><pre class="source lang-java linenums">package com.epiis.apicitasmedicas.entity;
+
+import java.util.Date;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+@Table(name = &quot;tappointment&quot;)
+@Setter
+@Getter
+<span class="fc" id="L22">public class EntityAppointment {</span>
+    @Id
+    @Column(name = &quot;idAppointment&quot;)
+    private String idAppointment;
+
+    @Column(name = &quot;idSpecialty&quot;)
+    private String idSpecialty;
+
+    @Column(name = &quot;idDoctor&quot;)
+    private String idDoctor;
+
+    @Column(name = &quot;idUser&quot;)
+    private String idUser;
+
+    @Column(name = &quot;code&quot;)
+    private String code;
+
+    @Column(name = &quot;personFullName&quot;)
+    private String personFullName;
+
+    @Column(name = &quot;description&quot;)
+    private String description;
+
+    @Column(name = &quot;preferredDate&quot;)
+    private Date preferredDate;
+
+    @Column(name = &quot;status&quot;)
+    private String status;
+
+    @Column(name = &quot;createdAt&quot;)
+    private Date createdAt;
+
+    @Column(name = &quot;updatedAt&quot;)
+    private Date updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;idSpecialty&quot;, insertable = false, updatable = false)
+    private EntitySpecialty parentSpecialty;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;idDoctor&quot;, insertable = false, updatable = false)
+    private EntityDoctor parentDoctor;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;idUser&quot;, insertable = false, updatable = false)
+    private EntityUser parentUser;
+
+    @OneToMany(mappedBy = &quot;parentAppointment&quot;, cascade = CascadeType.ALL)
+    private List&lt;EntityAppointmentFile&gt; childAppointmentFile;
+
+    @OneToMany(mappedBy = &quot;parentAppointment&quot;, cascade = CascadeType.ALL)
+    private List&lt;EntityAppointmentComment&gt; childAppointmentComment;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.epiis.apicitasmedicas.business.BusinessAppointmentTest
+-------------------------------------------------------------------------------
+Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.857 s -- in com.epiis.apicitasmedicas.business.BusinessAppointmentTest

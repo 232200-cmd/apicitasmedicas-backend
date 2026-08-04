@@ -14,7 +14,8 @@ public class SecurityUtil {
     public static String getCurrentUserRole() {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || auth.getAuthorities().isEmpty()) return null;
-        String authority = auth.getAuthorities().iterator().next().getAuthority();
-        return authority.replace("ROLE_", "");
+        var firstAuth = auth.getAuthorities().iterator().next();
+        String authority = firstAuth != null ? firstAuth.getAuthority() : null;
+        return authority != null ? authority.replace("ROLE_", "") : null;
     }
 }

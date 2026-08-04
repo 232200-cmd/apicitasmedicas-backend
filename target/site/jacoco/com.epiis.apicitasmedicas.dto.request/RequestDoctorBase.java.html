@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RequestDoctorBase.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">apicitasmedicas</a> &gt; <a href="index.source.html" class="el_package">com.epiis.apicitasmedicas.dto.request</a> &gt; <span class="el_source">RequestDoctorBase.java</span></div><h1>RequestDoctorBase.java</h1><pre class="source lang-java linenums">package com.epiis.apicitasmedicas.dto.request;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+<span class="fc" id="L12">public abstract class RequestDoctorBase {</span>
+    @NotBlank(message = &quot;El nombre del doctor es obligatorio.&quot;)
+    @Size(min = 2, max = 50, message = &quot;El nombre debe tener entre 2 y 50 caracteres.&quot;)
+    @Pattern(regexp = &quot;^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$&quot;, message = &quot;El nombre solo puede contener letras y espacios.&quot;)
+    private String firstName;
+
+    @NotBlank(message = &quot;El apellido del doctor es obligatorio.&quot;)
+    @Size(min = 2, max = 50, message = &quot;El apellido debe tener entre 2 y 50 caracteres.&quot;)
+    @Pattern(regexp = &quot;^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$&quot;, message = &quot;El apellido solo puede contener letras y espacios.&quot;)
+    private String surName;
+
+    @NotBlank(message = &quot;El email del doctor es obligatorio.&quot;)
+    @Email(message = &quot;Debe ser un email válido.&quot;)
+    @Size(max = 100, message = &quot;El email no puede exceder 100 caracteres.&quot;)
+    private String email;
+
+    @NotBlank(message = &quot;El teléfono del doctor es obligatorio.&quot;)
+    @Pattern(regexp = &quot;^\\d{9}$&quot;, message = &quot;El teléfono debe contener exactamente 9 dígitos.&quot;)
+    private String phoneNumber;
+
+    @NotBlank(message = &quot;La especialidad es obligatoria.&quot;)
+    private String idSpecialty;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

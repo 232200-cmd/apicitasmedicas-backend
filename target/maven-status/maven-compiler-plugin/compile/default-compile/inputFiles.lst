@@ -12,6 +12,7 @@ C:\Users\ASUS\OneDrive\Documentos\26-I\DS-II\PROYECTO\apicitasmedicas-backend\ci
 C:\Users\ASUS\OneDrive\Documentos\26-I\DS-II\PROYECTO\apicitasmedicas-backend\citasmedicas\src\main\java\com\epiis\apicitasmedicas\dto\request\RequestAppointmentInsert.java
 C:\Users\ASUS\OneDrive\Documentos\26-I\DS-II\PROYECTO\apicitasmedicas-backend\citasmedicas\src\main\java\com\epiis\apicitasmedicas\dto\request\RequestAuthLogin.java
 C:\Users\ASUS\OneDrive\Documentos\26-I\DS-II\PROYECTO\apicitasmedicas-backend\citasmedicas\src\main\java\com\epiis\apicitasmedicas\dto\request\RequestAuthRegister.java
+C:\Users\ASUS\OneDrive\Documentos\26-I\DS-II\PROYECTO\apicitasmedicas-backend\citasmedicas\src\main\java\com\epiis\apicitasmedicas\dto\request\RequestDoctorBase.java
 C:\Users\ASUS\OneDrive\Documentos\26-I\DS-II\PROYECTO\apicitasmedicas-backend\citasmedicas\src\main\java\com\epiis\apicitasmedicas\dto\request\RequestDoctorInsert.java
 C:\Users\ASUS\OneDrive\Documentos\26-I\DS-II\PROYECTO\apicitasmedicas-backend\citasmedicas\src\main\java\com\epiis\apicitasmedicas\dto\request\RequestDoctorUpdate.java
 C:\Users\ASUS\OneDrive\Documentos\26-I\DS-II\PROYECTO\apicitasmedicas-backend\citasmedicas\src\main\java\com\epiis\apicitasmedicas\dto\request\RequestSpecialtyInsert.java
